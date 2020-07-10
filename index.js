@@ -229,6 +229,40 @@ module.exports = (homebridge) => {
                             }
                         }
                     })
+
+                    connection.on('data', data => {
+                        const body = data + ''
+                        if(body.startsWith('EVENT/'))
+                        {
+                            const firstPosition = body.indexOf('{')
+                            const lastPosition = body.lastIndexOf('}')
+			    			logger("json body: ", body)
+			    			logger("end json body")
+			    			logger("json substr: ", body.substr(firstPosition, lastPosition - firstPosition + 1))
+			    			logger("end json substr")
+
+							const lines = body.replace(/\r/g, "").split(/\n/)
+							// logger(lines)
+							for(let line of lines)
+							{
+								if(line.startsWith('{'))
+								{
+			            			const start = line.indexOf('{')
+				    				const end = line.lastIndexOf('}')
+                                    const characteristics = JSON.parse(line.substr(start, end - start + 1)).characteristics
+
+                                    logger("Got characteristic event", characteristics)
+
+                                    for(let characteristic of characteristics)
+                                    {
+                                        pubsub.publish('CHARACTERISTIC_CHANGED', {
+                                            characteristicChanged: characteristic
+                                        })
+                                    }
+								}
+			    			}
+                        }
+                    })
         
                     let body = {
                         characteristics: []
