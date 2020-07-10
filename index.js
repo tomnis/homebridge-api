@@ -213,25 +213,6 @@ module.exports = (homebridge) => {
         
                     connection.on('data', data => {
                         const body = data + ''
-                        if(body.indexOf('EVENT/') === 0)
-                        {
-                            const firstPosition = body.indexOf('{')
-                            const lastPosition = body.lastIndexOf('}')
-                            const characteristics = JSON.parse(body.substr(firstPosition, lastPosition - firstPosition + 1)).characteristics
-        
-                            logger("Got characteristic event", characteristics)
-    
-                            for(let characteristic of characteristics)
-                            {
-                                pubsub.publish('CHARACTERISTIC_CHANGED', {
-                                    characteristicChanged: characteristic
-                                })
-                            }
-                        }
-                    })
-
-                    connection.on('data', data => {
-                        const body = data + ''
                         if(body.startsWith('EVENT/'))
                         {
                             const firstPosition = body.indexOf('{')
